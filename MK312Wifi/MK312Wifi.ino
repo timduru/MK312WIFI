@@ -8,6 +8,7 @@
 #include <SoftwareSerial.h>
 #include <WiFiManager.h>        // https://github.com/tzapu/WiFiManager
 #include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 
 #define VERSION 1.2.02
 #define AP_NAME "MK312CONFIG-AP"
@@ -228,6 +229,7 @@ void setup() {
   char s[17];
   sprintf(s, ">%i.%i.%i.%i", ip[0],ip[1],ip[2],ip[3]);
   writeText(s);
+  OTASetup();
 }
 
 // Checks if the AP button is pressed
@@ -244,6 +246,7 @@ void loop() {
   handleUDP();
   handleTCPIP();
   checkForAP();
+  OTALoop();
 }
 
 bool wifiEncryption = false; // Do we use encryption on wifi side?
