@@ -16,16 +16,26 @@
 #define COMM_PORT          8843 // main communication port in TCP
 
 //ESP8266-01
-//#define LED_PIN               1 // cathode pin of the radio LED (we use TX, since the system will output garbage on start, and we do not want to confuse the mk312)
-//#define RX_PIN                0 // rx pin to be used by the software implementation
-//#define RESET_WIFI_PIN        3 // The pin that needs to be pushed to ground to reset the wifi settings
-//#define TX_PIN                2 // tx pin to be used by the software implementation
+/*
+#define LED_PIN               1 // cathode pin of the radio LED (we use TX, since the system will output garbage on start, and we do not want to confuse the mk312)
+#define RX_PIN                0 // rx pin to be used by the software implementation
+#define RESET_WIFI_PIN        3 // The pin that needs to be pushed to ground to reset the wifi settings
+#define TX_PIN                2 // tx pin to be used by the software implementation
+*/
 
-// ESP12-E
-#define LED_PIN               D5 // STATE
+// DT-06 Wireless WiFi Serial Port TTL-WiFi Transmission Module HC-06 ESP-M2
+#define LED_PIN               4 // STATE on board / RADIO LED on MK312BT
+#define RX_PIN                3 // rx pin to be used by the software implementation
+#define RESET_WIFI_PIN        0 // SW1 on board
+#define TX_PIN                1 // tx pin to be used by the software implementation
+
+// Az-Delivery ESP12-E
+/*
+#define LED_PIN             D5 // RADIO LED
 #define RX_PIN                D6 //rx pin to be used by the software implementation
 #define RESET_WIFI_PIN        D1 //The pin that needs to be pushed to ground to reset the wifi settings
 #define TX_PIN                D7 //tx pin to be used by the software implementation
+*/
 
 #define FAIL_CHECKSUM         1
 #define FAIL_HANDSHAKE_A      2
