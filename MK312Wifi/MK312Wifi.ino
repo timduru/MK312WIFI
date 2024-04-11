@@ -10,6 +10,13 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
+
+#include <WebSocketsServer.h>
+#include <FS.h>
+
+//#define DEBUG               1
+//#define STANDALONE          1
+
 #define VERSION 1.2.02
 #define AP_NAME "MK312CONFIG-AP"
 
@@ -25,18 +32,24 @@
 */
 
 // DT-06 Wireless WiFi Serial Port TTL-WiFi Transmission Module HC-06 ESP-M2
+/* 
 #define LED_PIN               4 // STATE on board / RADIO LED on MK312BT
 #define RX_PIN                3 // rx pin to be used by the software implementation
 #define RESET_WIFI_PIN        0 // SW1 on board
 #define TX_PIN                1 // tx pin to be used by the software implementation
+*/
 
 // Az-Delivery ESP12-E
-/*
-#define LED_PIN             D5 // RADIO LED
-#define RX_PIN                D6 //rx pin to be used by the software implementation
+
+#define LED_PIN               D5 // RADIO LED
 #define RESET_WIFI_PIN        D1 //The pin that needs to be pushed to ground to reset the wifi settings
+#define RX_PIN                D6 //rx pin to be used by the software implementation
 #define TX_PIN                D7 //tx pin to be used by the software implementation
-*/
+
+
+#ifdef STANDALONE 
+#define LED_PIN             LED_BUILTIN
+#endif
 
 #define FAIL_CHECKSUM         1
 #define FAIL_HANDSHAKE_A      2
@@ -101,6 +114,9 @@ void errorstate(byte e) {
 
 // Internal Poke Command
 void poker(int addr, byte b) {
+#ifdef STANDALONE 
+  return; 
+#endif
   byte lo = addr >> 8;
   byte hi = addr & 0xff;
   mk312write_enc(0x4d);
@@ -113,6 +129,9 @@ void poker(int addr, byte b) {
 
 // Peeks an address from the memory of the device
 byte peeker(int addr) {
+#ifdef STANDALONE 
+  return 0xff; 
+#endif
   byte lo = addr >> 8;
   byte hi = addr & 0xff;
   mk312write_enc(0x3c);
@@ -172,6 +191,10 @@ void configModeCallback (WiFiManager *myWiFiManager) {
 
 // Establishes or reestablishes communication with the mk312 device
 void mk312_setup() {
+#ifdef STANDALONE 
+  return;
+#endif
+
   // Clear potential garbage from buffer
   delay(10);
   while (mySerial.available() > 0) mySerial.read();
@@ -230,12 +253,15 @@ void setup() {
   sprintf(s, ">%i.%i.%i.%i", ip[0],ip[1],ip[2],ip[3]);
   writeText(s);
   OTASetup();
+  WSSetup();
 }
 
 // Checks if the AP button is pressed
 void checkForAP() {
     bool resetWifi = !digitalRead(RESET_WIFI_PIN);
     if (resetWifi) {
+      WSStop();
+      delay(1000);
       writeText("WifiAP");
       WiFiManager wifiManager;
       wifiManager.startConfigPortal("OnDemandAP");
@@ -247,6 +273,7 @@ void loop() {
   handleTCPIP();
   checkForAP();
   OTALoop();
+  WSLoop();
 }
 
 bool wifiEncryption = false; // Do we use encryption on wifi side?
@@ -342,6 +369,7 @@ void handleTCPIP() {
               client.write(0x07); // Wrong checksum
               continue;
             }
+
 
             // Command checks out, send it to device
             mk312write_enc(cmd);
